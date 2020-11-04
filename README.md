@@ -1,1 +1,1 @@
-# aws-qldb-lambda
+# aws-qldb-lambda for Accord Project
