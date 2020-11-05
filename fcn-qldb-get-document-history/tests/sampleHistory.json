@@ -1,0 +1,35 @@
+{
+    "response": [{
+        "blockAddress": {
+            "strandId": "4I9LXogvtZT8MGNZk22Knb",
+            "sequenceNo": 13
+        },
+        "hash": "IhY1ytRCe12/AOOW23+DfVwLep7mbQA4STzW2rINA+k=",
+        "data": {
+            "_key": "minilatedeliveryandpenalty-payment.result",
+            "_val": "{\"clause\":\"minilatedeliveryandpenalty-payment@0.5.0-6ba8b3df91608c316b8bdffde2131f2816e5dfdcc5070ec007ba274ed730e2c9\",\"params\":{},\"response\":null,\"state\":{\"$class\":\"org.accordproject.cicero.contract.AccordContractState\",\"stateId\":\"org.accordproject.cicero.contract.AccordContractState#1\"},\"emit\":[]}"
+        },
+        "metadata": {
+            "id": "7T6FqpOWwXH2uI3Wyd8JZD",
+            "version": 0,
+            "txTime": "2020-10-12T07:40:28.660Z",
+            "txId": "4tPWCHMM6cF3rNvBV2mWB7"
+        }
+    }, {
+        "blockAddress": {
+            "strandId": "4I9LXogvtZT8MGNZk22Knb",
+            "sequenceNo": 22
+        },
+        "hash": "fsyBQtZP2Ge45j3HeIilQ97voNO4Tkill7CdOyTb13g=",
+        "data": {
+            "_key": "minilatedeliveryandpenalty-payment.result",
+            "_val": "{\"clause\":\"minilatedeliveryandpenalty-payment@0.5.0-6ba8b3df91608c316b8bdffde2131f2816e5dfdcc5070ec007ba274ed730e2c9\",\"request\":{\"$class\":\"org.accordproject.minilatedeliveryandpenalty.LateRequest\",\"agreedDelivery\":\"2019-04-01T12:00:00-05:00\",\"deliveredAt\":\"2019-04-20T03:24:00-05:00\",\"goodsValue\":200},\"response\":{\"$class\":\"org.accordproject.minilatedeliveryandpenalty.LateResponse\",\"penalty\":104,\"buyerMayTerminate\":true,\"transactionId\":\"9306d752-1457-46c8-888d-70c824ec1094\",\"timestamp\":\"2020-10-12T07:51:15.840Z\"},\"state\":{\"$class\":\"org.accordproject.cicero.contract.AccordContractState\",\"stateId\":\"org.accordproject.cicero.contract.AccordContractState#1\"},\"emit\":[{\"$class\":\"org.accordproject.cicero.runtime.PaymentObligation\",\"amount\":{\"$class\":\"org.accordproject.money.MonetaryAmount\",\"doubleValue\":104,\"currencyCode\":\"USD\"},\"description\":\"Betty Buyer should pay penalty amount to Steve Seller\",\"contract\":\"resource:org.accordproject.minilatedeliveryandpenalty.MiniLateDeliveryContract#df12432a-0a82-47d0-9dcb-f3f4527cba32\",\"promisor\":\"resource:org.accordproject.cicero.contract.AccordParty#Betty%20Buyer\",\"promisee\":\"resource:org.accordproject.cicero.contract.AccordParty#Steve%20Seller\",\"eventId\":\"valid\",\"timestamp\":\"2020-10-12T07:51:15.842Z\"}]}"
+        },
+        "metadata": {
+            "id": "7T6FqpOWwXH2uI3Wyd8JZD",
+            "version": 1,
+            "txTime": "2020-10-12T07:51:16.154Z",
+            "txId": "EKwDaxV3DBQJJ2mlKSewXV"
+        }
+    }]
+}

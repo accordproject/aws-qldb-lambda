@@ -1,0 +1,34 @@
+{
+    "event": {
+        "$class": "org.accordproject.cicero.runtime.PaymentObligation",
+        "amount": {
+            "$class": "org.accordproject.money.MonetaryAmount",
+            "doubleValue": 104,
+            "currencyCode": "USD"
+        },
+        "description": "Betty Buyer should pay penalty amount to Steve Seller",
+        "contract": "resource:org.accordproject.minilatedeliveryandpenalty.MiniLateDeliveryContract#df12432a-0a82-47d0-9dcb-f3f4527cba32",
+        "promisor": "resource:org.accordproject.cicero.contract.AccordParty#Betty%20Buyer",
+        "promisee": "resource:org.accordproject.cicero.contract.AccordParty#Steve%20Seller",
+        "eventId": "valid",
+        "timestamp": "2020-10-19T03:30:11.400Z"
+    },
+    "ledgerMetadata": {
+        "LedgerName": "accord-contracts",
+        "TableName": "Accord",
+        "BlockAddress": {
+            "IonText": "{strandId: \"4I9LXogvtZT8MGNZk22Knb\", sequenceNo: 112}"
+        },
+        "DocumentId": "7T6FqpOWwXH2uI3Wyd8JZD",
+        "RevisionHash": "GKBGtFYwwwqECNHHBSXvxYYuR8tqifWsPARFwcyVYXg=",
+        "Proof": {
+            "IonText": "[{{xHhHq85r7tgE1Ywo450EPC84azSiqiXax/zN9GClp7k=}},{{V6Q4z4dZ36mD+oOC0ZLpS71gNCIMMUpo8KKhF7KEchs=}},{{qtU8Ku4y5SOsPJLCDJzB6CscH7CNpgkNBOZ+cedqQ5o=}},{{4zEE8756T0oaCAGwerzpta+8wCIfvBIwKQdTrcSCbXE=}},{{fSCsDD3uVJhJt5JY2Hh6jzOEhB1LAsHUFXA69sfjE/k=}},{{MnDlUHFdUePTVCGVGiUUk+bCwPwcIhHQ6Wp8I2ZH0pc=}},{{l9KwEPbTaAogi8N8s6TAHyygk084wotud3APwxULdR8=}}]"
+        },
+        "LedgerDigest": {
+            "Digest": "colXiSBAtfZLICwnOoy+1RZCDCu0w43uSyLbynGgYng=",
+            "DigestTipAddress": {
+                "IonText": "{strandId:\"4I9LXogvtZT8MGNZk22Knb\",sequenceNo:113}"
+            }
+        }
+    }
+}

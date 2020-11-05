@@ -1,0 +1,7 @@
+{
+    "contractSourceS3BucketObjectPath": "supplyagreement.cta",
+    "ledgerDataPath": "Accord",
+    "eventsQueue": "",
+    "contractId": "supplyagreement",
+    "contractData": "{\"$class\":\"org.accordproject.supplyagreement.SupplyAgreementContract\",\"contractId\":\"237f59c7-bc83-4391-bc06-76cdea51f421\",\"effectiveDate\":\"2018-04-02T00:00:00.000+08:00\",\"supplier\":\"DAN\",\"buyer\":\"PETER\",\"shortDescriptionOfTheProducts\":\"Umbrellas\",\"noticeWindow\":2,\"cancellationWindow\":10,\"minimumPercentage\":85,\"deliverables\":\"Colorful Umbrellas\",\"deliveryWindow\":1,\"deliveryAttachment\":\"Annex A\",\"inspectionWindow\":3,\"acceptanceAttachment\":\"Annex B\",\"priceUpdateWindow\":15,\"accountNumber\":\"XXX-XX\",\"routingNumnber\":\"YYY-YY\",\"termYears\":2,\"renewalYears\":1,\"renewalWindow\":30,\"governingState\":\"NY\",\"venueState\":\"NY\"}"
+}

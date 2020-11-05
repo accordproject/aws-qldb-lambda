@@ -1,0 +1,5 @@
+{
+    "ledgerDataPath": "Accord",
+    "contractId": "supplyagreement",
+    "requestString": "{\"$class\":\"org.accordproject.supplyagreement.ForecastRequest\",\"supplyForecast\":20}"
+}

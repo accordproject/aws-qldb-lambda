@@ -1,0 +1,20 @@
+{
+    "ledgerMetadata": {
+        "LedgerName": "accord-contracts",
+        "TableName": "Accord",
+        "BlockAddress": {
+            "IonText": "{strandId: \"4I9LXogvtZT8MGNZk22Knb\", sequenceNo: 22}"
+        },
+        "DocumentId": "7T6FqpOWwXH2uI3Wyd8JZD",
+        "RevisionHash": "fsyBQtZP2Ge45j3HeIilQ97voNO4Tkill7CdOyTb13g=",
+        "Proof": {
+            "IonText": "[{{MBFAABLdfxLQPSL/vduIWqxaZz+GfGDk/kG5PChDctU=}},{{DHUqxz0L9+W/7pDuZ8BcVGmK6eTGgMKrcRcqCzq9axA=}},{{ukYoGHYKf/ZG4ZMBj9fIanTdLm/IwlECtWedWDgdAow=}},{{7iSabBAa/Z08fUeflUcxu0C9svmIpMDHSb3yT4aBcV4=}},{{Syj24w4tr+BjnO/ZmX47an9IAkSn9KqS8oWvVRnT5jU=}},{{4tsv4qNFQ1cIgrJdskGuvQ57PsSjgg+aZ6nP2dLH+n0=}},{{3G8IeHglVaFgG/SobS5stXmGrREIG9pdTgCAyBFfezg=}},{{twmVyhF3NiUYkmbrSJAgFDNDuxLpaxRFCxnTIbs9n9o=}}]"
+        },
+        "LedgerDigest": {
+            "Digest": "1K8WBXEqkpjP9ncPev/ckfWCuBJqpeGGLghyeFIsV1Y=",
+            "DigestTipAddress": {
+                "IonText": "{strandId:\"4I9LXogvtZT8MGNZk22Knb\",sequenceNo:26}"
+            }
+        }
+    }
+}

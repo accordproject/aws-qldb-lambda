@@ -1,0 +1,30 @@
+{
+  "name": "accord-qldb-lambda",
+  "version": "1.0.0",
+  "description": "A set of Lambda functions to deploy and execute an Accord Project Smart Legal Contract",
+  "main": "index.js",
+  "engines": {
+    "node": ">=8.4.0 <11.0",
+    "npm": ">=5.3.0 <7.0"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "package": "sam package --template-file ../template.yaml --s3-bucket sam-us-east-1-272769237722 > ../.aws-sam/build/template-orig.yaml && cat ../.aws-sam/build/template-orig.yaml | sed 's/Uploading.*//' > ../.aws-sam/build/template.yaml && rm ../.aws-sam/build/template-orig.yaml",
+    "deploy": "sam deploy --template-file ../.aws-sam/build/template.yaml --stack-name sam-us-east-1-272769237722",
+    "runLocal": "rm -rf ./lib && cp -r ../lib . && sam local invoke -e tests/event.json -t fcn.yaml",
+    "test": "npm run lint && mocha -r tests/**/* --reporter spec",
+    "clean": "rm -rf .aws-sam"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@accordproject/cicero-core": "^0.21.9",
+    "@accordproject/cicero-engine": "^0.21.9",
+    "aws-sdk": "^2.564.0",
+    "jsbi": "^3.1.1",
+    "fs-extra": "^8.1.0",
+    "log4js": "^3.0.6",
+    "unzipper": "^0.10.5",
+    "amazon-qldb-kvs-nodejs": "^1.0.0"
+  },
+  "author": "Nikolay Vlasov"
+}
