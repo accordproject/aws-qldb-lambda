@@ -1,0 +1,7 @@
+{
+    "contractSourceS3BucketObjectPath": "minilatedeliveryandpenalty-payment.cta",
+    "ledgerDataPath": "Accord",
+    "eventsQueue": "accord-contracts-output",
+    "contractId": "minilatedeliveryandpenalty-payment",
+    "contractData": "{\"$class\":\"org.accordproject.minilatedeliveryandpenalty.MiniLateDeliveryContract\",\"contractId\":\"df12432a-0a82-47d0-9dcb-f3f4527cba32\",\"buyer\":{\"$class\":\"org.accordproject.cicero.contract.AccordParty\",\"partyId\":\"Steve Seller\"},\"seller\":{\"$class\":\"org.accordproject.cicero.contract.AccordParty\",\"partyId\":\"Betty Buyer\"},\"penaltyDuration\":{\"$class\":\"org.accordproject.time.Duration\",\"amount\":2,\"unit\":\"days\"},\"penaltyPercentage\":10.5,\"capPercentage\":52,\"maximumDelay\":{\"$class\":\"org.accordproject.time.Duration\",\"amount\":15,\"unit\":\"days\"}}"
+}

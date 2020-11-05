@@ -1,0 +1,5 @@
+{
+    "ledgerDataPath": "Accord",
+    "contractId": "supplyagreement",
+    "requestString": "{\"$class\":\"org.accordproject.supplyagreement.PurchaseRequest\",\"purchaseOrder\":{\"products\":[{\"partNumber\":\"17162\",\"name\":\"bob\",\"quantity\":1,\"unitPrice\":50}],\"deliveryLocation\":\"NY\",\"deliveryDate\":\"Sun Mar 22 2020 15:04:41 GMT+0800\"}}"
+}

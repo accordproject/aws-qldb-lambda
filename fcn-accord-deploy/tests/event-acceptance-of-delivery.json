@@ -1,0 +1,9 @@
+{
+    "contractSourceS3BucketName": "lambda-accord-cicero-us-east-1-272769237722",
+    "contractSourceS3BucketObjectPath": "acceptance-of-delivery.cta",
+    "ledgerId": "vehicle-registration",
+    "ledgerDataPath": "Accord",
+    "eventsQueueURL": "https://sqs.us-east-1.amazonaws.com/272769237722/accord-contracts-output",
+    "contractId": "acceptance-of-delivery",
+    "contractData": "{\"$class\":\"org.accordproject.acceptanceofdelivery.AcceptanceOfDeliveryClause\",\"clauseId\":\"a84dc686-1475-4eda-a9e7-4488730257b0\",\"shipper\":\"Party A\",\"receiver\":\"Party B\",\"deliverable\":\"Widgets\",\"businessDays\":10,\"attachment\":\"Attachment X\"}"
+}

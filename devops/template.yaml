@@ -1,0 +1,341 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'Accord Project on AWS SAM Template to deploy and execute Accord Project
+  contracts on AWS
+
+  '
+Parameters:
+  ContractTemplatesRepositoryS3BucketName:
+    Type: String
+    Description: 'A name of an S3 bucket storing Accord Project contract templates.
+
+      '
+  QLDBContractLedgerName:
+    Type: String
+    Description: 'A name of a QLDB ledger to keep the state of instantiated Accord
+      Project contracts.
+
+      '
+  EventsQueueName:
+    Type: String
+    Description: 'A name of an SQS queue to send events, emitted during the contract
+      execution.
+
+      '
+Globals:
+  Function:
+    Runtime: nodejs10.x
+    Timeout: 180
+    Handler: index.handler
+    Environment:
+      Variables:
+        AWS_REGION_NAME:
+          Fn::Sub: ${AWS::Region}
+        KVS_LIB_PATH: /opt/nodejs/lib/amazon-qldb-kvs-nodejs
+        ACCORD_S3_CONTRACTS_REPO_NAME:
+          Ref: S3ContractTemplatesRepositoryBucket
+        ACCORD_LEDGER_NAME:
+          Ref: QLDBContractLedgerName
+        ACCORD_EVENTS_QUEUE_NAME:
+          Ref: EventsQueueName
+        ACCORD_EVENTS_QUEUE_URL:
+          Fn::Sub: https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}/${EventsQueueName}
+Resources:
+  depLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName:
+        Fn::Sub: ${AWS::StackName}-cicero-sam-dependencies
+      Description: Dependencies for sam app [node_modules, lib]
+      ContentUri: s3://accord-sam-us-east-1-272769237722/cd71a1f3da8e3710b9f381a2f378837b
+      CompatibleRuntimes:
+      - nodejs10.x
+      LicenseInfo: Apache2
+      RetentionPolicy: Delete
+  accorddeploy:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: nodejs10.x
+      CodeUri: s3://accord-sam-us-east-1-272769237722/36db770fab27b3654f19f7d46d8b1e54
+      Description: Lambda function that helps to deploy Accord Project Contract
+      MemorySize: 512
+      Timeout: 900
+      Role:
+        Fn::GetAtt:
+        - AccordLambdaRole
+        - Arn
+      FunctionName:
+        Fn::Sub: ${AWS::StackName}-accord-deploy
+      Layers:
+      - Ref: depLayer
+      Tags:
+        AccordContracts: AccordDeploy
+  accordexecute:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: nodejs10.x
+      CodeUri: s3://accord-sam-us-east-1-272769237722/822b503e2b493096e0117a59554d1eba
+      Description: Lambda function that helps to execute Accord Project Contract
+      MemorySize: 512
+      Timeout: 900
+      Role:
+        Fn::GetAtt:
+        - AccordLambdaRole
+        - Arn
+      FunctionName:
+        Fn::Sub: ${AWS::StackName}-accord-execute
+      Layers:
+      - Ref: depLayer
+      Tags:
+        AccordContracts: LambdaAccordExecute
+  qldbgetrevision:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: nodejs10.x
+      CodeUri: s3://accord-sam-us-east-1-272769237722/9a0aa0c20c8fa44b5e63a9bd47700440
+      Description: Retrieve a specific revision of QLDB document by Document Id and
+        full BlockAddress
+      MemorySize: 256
+      Timeout: 900
+      Role:
+        Fn::GetAtt:
+        - AccordLambdaRole
+        - Arn
+      FunctionName:
+        Fn::Sub: ${AWS::StackName}-qldb-get-document-revision
+      Layers:
+      - Ref: depLayer
+      Tags:
+        AccordContracts: LambdaQLDBGetRevision
+  qldbverify:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: nodejs10.x
+      CodeUri: s3://accord-sam-us-east-1-272769237722/39acc4356b0c9a2afe7e0934e2e13eb3
+      Description: Verify Ledger Metadata for a specific document against the Ledger
+      MemorySize: 128
+      Timeout: 900
+      Role:
+        Fn::GetAtt:
+        - AccordLambdaRole
+        - Arn
+      FunctionName:
+        Fn::Sub: ${AWS::StackName}-qldb-verify
+      Layers:
+      - Ref: depLayer
+      Tags:
+        AccordContracts: LambdaQLDBVerify
+  qldbvgethistory:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: nodejs10.x
+      CodeUri: s3://accord-sam-us-east-1-272769237722/02504b3611b5b458bbf28978fb3b1aff
+      Description: Get full document history from the ledger by document key
+      MemorySize: 128
+      Timeout: 900
+      Role:
+        Fn::GetAtt:
+        - AccordLambdaRole
+        - Arn
+      FunctionName:
+        Fn::Sub: ${AWS::StackName}-qldb-get-document-history
+      Layers:
+      - Ref: depLayer
+      Tags:
+        AccordContracts: LambdaQLDBGetHistory
+  qldbvgetmetadata:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: nodejs10.x
+      CodeUri: s3://accord-sam-us-east-1-272769237722/c75591c7cd4954ecbf36bb413a692713
+      Description: Get full document metadata from the ledger by document key
+      MemorySize: 128
+      Timeout: 900
+      Role:
+        Fn::GetAtt:
+        - AccordLambdaRole
+        - Arn
+      FunctionName:
+        Fn::Sub: ${AWS::StackName}-qldb-get-document-metadata
+      Layers:
+      - Ref: depLayer
+      Tags:
+        AccordContracts: LambdaQLDBGetMetadata
+  QLDBLedger:
+    Type: AWS::QLDB::Ledger
+    Properties:
+      DeletionProtection: true
+      Name:
+        Ref: QLDBContractLedgerName
+      PermissionsMode: ALLOW_ALL
+      Tags:
+      - Key: AccordContracts
+        Value: ContractStateLedger
+  S3ContractTemplatesRepositoryBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:
+        Fn::Sub: ${ContractTemplatesRepositoryS3BucketName}-${AWS::Region}-${AWS::AccountId}
+      Tags:
+      - Key: AccordContracts
+        Value: ContractTemplatesRepository
+  EventsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName:
+        Ref: EventsQueueName
+      DelaySeconds: 0
+      VisibilityTimeout: 120
+  AccordLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: ${AWS::StackName}-AccordLambdaRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: /
+      Tags:
+      - Key: AccordContracts
+        Value: AccordLambdaRole
+      Policies:
+      - PolicyName:
+          Fn::Sub: ${AWS::StackName}-CloudWatchLogsAndCloudFormationAccess
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - cloudwatch:PutMetricData
+            - cloudwatch:PutMetricAlarm
+            - cloudwatch:DescribeAlarms
+            - cloudformation:describeStacks
+            Resource: '*'
+          - Effect: Allow
+            Action:
+            - logs:*
+            Resource: arn:aws:logs:*:*:*
+      - PolicyName:
+          Fn::Sub: ${AWS::StackName}-VPCLambdaInstantiationAccess
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Sid: VisualEditor0
+            Effect: Allow
+            Action:
+            - ec2:DescribeSubnets
+            - ec2:DescribeSecurityGroups
+            Resource: '*'
+      - PolicyName: S3ReadWriteAccess
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Action:
+            - s3:GetObject
+            Effect: Allow
+            Resource: arn:aws:s3:::*/*
+          - Action:
+            - s3:GetObject
+            - s3:PutObject
+            - s3:PutObjectAcl
+            Effect: Allow
+            Resource:
+              Fn::Sub: arn:aws:s3:::${ContractTemplatesRepositoryS3BucketName}*/*
+      - PolicyName:
+          Fn::Sub: ${AWS::StackName}-QLDBReadWriteAccess
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Sid: VisualEditor0
+            Effect: Allow
+            Action:
+            - qldb:ExecuteStatement
+            - qldb:GetBlock
+            - qldb:ListLedgers
+            - qldb:ListJournalS3ExportsForLedger
+            - qldb:GetRevision
+            - qldb:ExportJournalToS3
+            - qldb:DescribeLedger
+            - qldb:SendCommand
+            - qldb:ListJournalS3Exports
+            - qldb:DescribeJournalS3Export
+            - qldb:GetDigest
+            - qldb:ListTagsForResource"
+            Resource:
+              Fn::Sub: arn:aws:qldb:${AWS::Region}:${AWS::AccountId}:ledger/${QLDBContractLedgerName}
+      - PolicyName:
+          Fn::Sub: ${AWS::StackName}-SQSPublishAccess
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - sqs:SendMessage
+            - sqs:GetQueueAttributes
+            - sqs:ChangeMessageVisibility
+            Resource:
+              Fn::Sub: arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${EventsQueueName}
+Outputs:
+  AccordDeployARN:
+    Description: Arn of accord deploy function
+    Value:
+      Fn::GetAtt:
+      - accorddeploy
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-accord-deployARN
+  AccordExecuteARN:
+    Description: Arn of accord execute function
+    Value:
+      Fn::GetAtt:
+      - accordexecute
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-accord-executeARN
+  QLDBGetDocRevisionARN:
+    Description: Arn of QLDB get document revision function
+    Value:
+      Fn::GetAtt:
+      - qldbgetrevision
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-qldb-get-document-revisionARN
+  QLDBVerifyARN:
+    Description: Arn of QLDB verify function
+    Value:
+      Fn::GetAtt:
+      - qldbverify
+      - Arn
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-qldb-verifyARN
+  ContractLedgerName:
+    Description: Name of a QLDB ledger to keep contract state
+    Value:
+      Ref: QLDBLedger
+  ContractRepoS3BucketName:
+    Description: Name of an S3 bucket to keep contract templates repository
+    Value:
+      Ref: S3ContractTemplatesRepositoryBucket
+  EventsQueueARN:
+    Description: An ARN of an SQS queue for emitting contract events
+    Value:
+      Fn::GetAtt:
+      - EventsQueue
+      - Arn
+  EventsQueueURL:
+    Description: A URL of an SQS queue for emitting contract events
+    Value:
+      Ref: EventsQueue
+

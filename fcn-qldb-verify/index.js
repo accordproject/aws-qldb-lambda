@@ -1,0 +1,66 @@
+/*
+ * Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance with
+ * the License. A copy of the License is located at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
+ * and limitations under the License.
+ */
+
+const logger = require("/opt/nodejs/lib/logging").getLogger("fcn-qldb-verify");
+const Config = require("./config");
+//const KVS_LIB_PATH = process.env.KVS_LIB_PATH ? process.env.KVS_LIB_PATH : "/opt/nodejs/lib/s3-kvs.js";
+const KVS = require("amazon-qldb-kvs-nodejs").QLDBKVS;
+
+/**
+ * Verifies metadata information, sent to the function
+ * <ol>
+ *   <li>event.documentKey A value of the document's key parameter.
+ *   <li>event.ledgerMetadata An object, holding a ledger metadata for document verification. Includes th following parameters:
+ *   <li>event.ledgerMetadata.LedgerName
+ *   <li>event.ledgerMetadata.TableName
+ *   <li>event.ledgerMetadata.BlockAddress
+ *   <li>event.ledgerMetadata.DocumentId
+ *   <li>event.ledgerMetadata.RevisionHash
+ *   <li>event.ledgerMetadata.Proof
+ *   <li>event.ledgerMetadata.LedgerDigest
+ * </ol>
+ */
+
+exports.handler = async (event, context) => {
+
+    const fcnName = "[fcn-qldb-verify]";
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            logger.info(`${fcnName}============= START : Verify Ledger Metadata ===========`);
+
+            config = await new Config(event);
+
+            logger.info(`${fcnName} New config object: ${JSON.stringify(config)}`);
+
+            const ledgerMetadata = config.ledgerMetadata;
+
+            const kvs = new KVS(ledgerMetadata.LedgerName, ledgerMetadata.TableName);
+
+            // get verification result
+            const verificationResult = await kvs.verifyMetadata(ledgerMetadata);
+
+            const output = {
+                response: verificationResult
+            }
+            resolve(JSON.stringify(output));
+        } catch (err) {
+            logger.error(`${fcnName}: ${err}`);
+            logger.debug(`${err.stack}`);
+            const output = {
+                error: `${fcnName}: ${err}`
+            }
+            reject(JSON.stringify(output));
+        }
+    })
+};

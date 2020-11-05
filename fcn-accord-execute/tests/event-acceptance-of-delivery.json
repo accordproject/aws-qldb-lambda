@@ -1,0 +1,7 @@
+{
+    "ledgerId": "vehicle-registration",
+    "ledgerDataPath": "Accord",
+    "eventsQueueURL": "https://sqs.us-east-1.amazonaws.com/272769237722/accord-contracts-output",
+    "contractId": "acceptance-of-delivery",
+    "requestString": "{\"$class\":\"org.accordproject.acceptanceofdelivery.InspectDeliverable\",\"deliverableReceivedAt\":\"27 Mar 2020 16:34:00 Z\",\"inspectionPassed\":true}"
+}

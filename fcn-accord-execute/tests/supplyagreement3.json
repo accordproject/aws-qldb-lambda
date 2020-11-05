@@ -1,0 +1,9 @@
+{
+    "$class": "org.accordproject.supplyagreement.DeliveryRequest",
+    "products": [{
+        "partNumber": "17162",
+        "name": "bob",
+        "quantity": 1.0,
+        "unitPrice": 50
+    }]
+}
