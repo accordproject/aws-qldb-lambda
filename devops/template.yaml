@@ -47,7 +47,7 @@ Resources:
       LayerName:
         Fn::Sub: ${AWS::StackName}-cicero-sam-dependencies
       Description: Dependencies for sam app [node_modules, lib]
-      ContentUri: s3://accord-sam-us-east-1-272769237722/cd71a1f3da8e3710b9f381a2f378837b
+      ContentUri: s3://accord-sam-us-east-1-272769237722/480f47558b44b8bad9725ef7f5c68948
       CompatibleRuntimes:
       - nodejs10.x
       LicenseInfo: Apache2
@@ -56,7 +56,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Runtime: nodejs10.x
-      CodeUri: s3://accord-sam-us-east-1-272769237722/36db770fab27b3654f19f7d46d8b1e54
+      CodeUri: s3://accord-sam-us-east-1-272769237722/a4649a9cbb4663c65fcd231b5cfbffac
       Description: Lambda function that helps to deploy Accord Project Contract
       MemorySize: 512
       Timeout: 900
@@ -74,7 +74,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Runtime: nodejs10.x
-      CodeUri: s3://accord-sam-us-east-1-272769237722/822b503e2b493096e0117a59554d1eba
+      CodeUri: s3://accord-sam-us-east-1-272769237722/5e414ea2c43f96160b2e4682ed155315
       Description: Lambda function that helps to execute Accord Project Contract
       MemorySize: 512
       Timeout: 900
@@ -92,7 +92,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Runtime: nodejs10.x
-      CodeUri: s3://accord-sam-us-east-1-272769237722/9a0aa0c20c8fa44b5e63a9bd47700440
+      CodeUri: s3://accord-sam-us-east-1-272769237722/24fde02b3f27be79e269395c5b63fa90
       Description: Retrieve a specific revision of QLDB document by Document Id and
         full BlockAddress
       MemorySize: 256
@@ -111,7 +111,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Runtime: nodejs10.x
-      CodeUri: s3://accord-sam-us-east-1-272769237722/39acc4356b0c9a2afe7e0934e2e13eb3
+      CodeUri: s3://accord-sam-us-east-1-272769237722/6ae6de2d40cb98d5c94d4f10f827eca3
       Description: Verify Ledger Metadata for a specific document against the Ledger
       MemorySize: 128
       Timeout: 900
@@ -129,7 +129,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Runtime: nodejs10.x
-      CodeUri: s3://accord-sam-us-east-1-272769237722/02504b3611b5b458bbf28978fb3b1aff
+      CodeUri: s3://accord-sam-us-east-1-272769237722/1e9bf07c535de200a12d39fca0b279b2
       Description: Get full document history from the ledger by document key
       MemorySize: 128
       Timeout: 900
@@ -147,7 +147,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Runtime: nodejs10.x
-      CodeUri: s3://accord-sam-us-east-1-272769237722/c75591c7cd4954ecbf36bb413a692713
+      CodeUri: s3://accord-sam-us-east-1-272769237722/0295c653845ce5c6c75eb0ecfd024245
       Description: Get full document metadata from the ledger by document key
       MemorySize: 128
       Timeout: 900

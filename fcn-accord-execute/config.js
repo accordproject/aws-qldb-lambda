@@ -33,6 +33,11 @@ module.exports = class Config {
                     throw new Error(` Please specify contractId in the event message`)
                 };
 
+                this.contractSourceS3BucketName = event.contractSourceS3BucketName ? event.contractSourceS3BucketName : process.env.ACCORD_S3_CONTRACTS_REPO_NAME
+                if (!this.contractSourceS3BucketName || !this.contractSourceS3BucketName instanceof String || !this.contractSourceS3BucketName.length) {
+                    throw new Error(` Please specify contractSourceS3BucketName in the event message or set ACCORD_S3_CONTRACTS_REPO_NAME environmental variable`)
+                };
+
                 this.ledgerDataPath = event.ledgerDataPath ? event.ledgerDataPath : this.contractId;
                 this.eventsQueueURL = event.eventsQueueURL ? event.eventsQueueURL : process.env.ACCORD_EVENTS_QUEUE_URL;
 
