@@ -22,10 +22,6 @@ Parameters:
     Type: String
     Description: >
       A name of an S3 bucket storing Accord Project contract templates.
-  # ContractS3BucketName:
-  #   Type: String
-  #   Description: >
-  #     A name of an S3 bucket to keep the state of instantiated Accord Project contracts.
   QLDBContractLedgerName:
     Type: String
     Description: >
@@ -34,11 +30,6 @@ Parameters:
     Type: String
     Description: >
       A name of an SQS queue to send events, emitted during the contract execution.
-  # QLDBTableName:
-  #   Type: String
-  #   Description: >
-  #     A name of a QLDB that keeps the state of instantiated Accord Project contracts.
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Runtime: nodejs10.x

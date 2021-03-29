@@ -41,7 +41,7 @@ exports.handler = async (event, context) => {
 
             logger.info(`${fcnName}============= START : Retrieving Document Revision ===========`);
 
-            config = await new Config(event);
+            let config = await new Config(event);
 
             logger.info(`${fcnName} New config object: ${JSON.stringify(config)}`);
 

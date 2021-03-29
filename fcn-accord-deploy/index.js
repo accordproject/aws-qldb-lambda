@@ -60,7 +60,7 @@ exports.handler = async (event, context) => {
 
             logger.info(`${fcnName}============= START : Deploy Smart Contract ===========`);
 
-            config = await new Config(event);
+            let config = await new Config(event);
             const ledgerName = config.ledgerName;
             const contractId = config.contractId;
             const ledgerDataPath = config.ledgerDataPath;
@@ -153,7 +153,13 @@ exports.handler = async (event, context) => {
 
             if (!contractStateExists) {
                 // Saving contract as a file
-                await kvs.uploadAsFile(contractFileName, contractFilePath);
+                // await kvs.uploadAsFile(contractFileName, contractFilePath);
+                const contractTemplateLinkObject = {
+                    s3path: contractSourceS3BucketObjectPath,
+                    hash: template.getHash()
+                }
+
+                await kvs.setValue(contractFileName, contractTemplateLinkObject);
 
                 await kvs.setValue(contractStateKeyName, result.state);
 
@@ -170,6 +176,8 @@ exports.handler = async (event, context) => {
                     const allPromises = [];
                     let ledgerMetadata = {};
                     if (kvs.getMetadata) {
+                        // Giving the ledger some time to settle
+                        await Utils.__timeout(400);
                         ledgerMetadata = await kvs.getMetadata(contractResultKeyName);
                     }
                     result.emit.forEach(async (event, index) => {

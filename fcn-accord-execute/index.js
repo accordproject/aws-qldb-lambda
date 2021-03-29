@@ -34,6 +34,8 @@ const {
 } = require("path");
 
 const KVS = require("amazon-qldb-kvs-nodejs").QLDBKVS;
+const CONTRACT_TEMPLATE_REPO_KVS_LIB_PATH = process.env.CONTRACT_TEMPLATE_REPO_KVS_LIB_PATH ? process.env.CONTRACT_TEMPLATE_REPO_KVS_LIB_PATH : "/opt/nodejs/lib/s3-kvs.js";
+const S3 = require(CONTRACT_TEMPLATE_REPO_KVS_LIB_PATH);
 
 const emptyDir = Util.promisify(fs.emptyDir);
 const mkdir = Util.promisify(fs.mkdir);
@@ -61,12 +63,14 @@ exports.handler = async (event, context) => {
 
             logger.info(`${fcnName}============= START : Execute Smart Contract ===========`);
 
-            config = await new Config(event);
+            let config = await new Config(event);
             const ledgerName = config.ledgerName;
             const contractId = config.contractId;
             const ledgerDataPath = config.ledgerDataPath;
             const contractFileName = config.contractFileName;
             const eventsQueueURL = config.eventsQueueURL;
+            const contractSourceS3BucketName = config.contractSourceS3BucketName;
+
             const requestString = config.requestString;
 
             const contractDataKeyName = config.contractDataKeyName;
@@ -75,6 +79,7 @@ exports.handler = async (event, context) => {
 
             logger.info(`${fcnName} New config object: ${JSON.stringify(config)}`);
 
+            const s3 = new S3(contractSourceS3BucketName, "", false, TARGET_DIR);
             const kvs = new KVS(ledgerName, ledgerDataPath);
 
             await emptyDir(STORAGE_DIR);
@@ -82,7 +87,9 @@ exports.handler = async (event, context) => {
 
             const contractFilePath = `${TARGET_DIR}/${contractFileName}`;
 
-            const templateData = await kvs.downloadAsFile(contractFileName, contractFilePath);
+            const contractTemplateLinkObject = await kvs.getValue(contractFileName);
+
+            const templateData = await s3.downloadAsFile(contractTemplateLinkObject.s3path, contractFilePath);
 
             logger.debug(`${fcnName} Received template data: ${templateData}`);
 
@@ -96,6 +103,10 @@ exports.handler = async (event, context) => {
             await Utils.__unzip(contractFilePath, contractUnzipFolder)
             const template = await Template.fromDirectory(contractUnzipFolder); //Buffer.from(templateDataString, 'base64'));
             logger.info(`${fcnName} Loaded template: ${template.getIdentifier()}`);
+
+            if (template.getHash() !== contractTemplateLinkObject.hash) {
+                throw new Error(`Got unexpected hash of the template retrieved from S3. Expected: ${contractTemplateLinkObject.hash} received: ${template.getHash()}`);
+            }
 
             // load data
             let dataJSON;
@@ -152,6 +163,8 @@ exports.handler = async (event, context) => {
                     const allPromises = [];
                     let ledgerMetadata = {};
                     if (kvs.getMetadata) {
+                        // Giving the ledger some time to settle
+                        await Utils.__timeout(400);
                         ledgerMetadata = await kvs.getMetadata(contractResultKeyName);
                     }
                     result.emit.forEach(async (event, index) => {
