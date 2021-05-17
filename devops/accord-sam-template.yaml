@@ -16,7 +16,7 @@ AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
   Accord Project on AWS
-  SAM Template to deploy and execute Accord Project contracts on AWS
+  SAM Template to deploy and run Accord Project contracts on AWS
 Parameters:
   ContractTemplatesRepositoryS3BucketName:
     Type: String
@@ -32,13 +32,12 @@ Parameters:
       A name of an SQS queue to send events, emitted during the contract execution.
 Globals:
   Function:
-    Runtime: nodejs10.x
+    Runtime: nodejs12.x
     Timeout: 180
     Handler: index.handler
     Environment:
       Variables:
         AWS_REGION_NAME: !Sub "${AWS::Region}"
-        KVS_LIB_PATH: "/opt/nodejs/lib/amazon-qldb-kvs-nodejs"
         ACCORD_S3_CONTRACTS_REPO_NAME: !Ref S3ContractTemplatesRepositoryBucket
         ACCORD_LEDGER_NAME: !Ref QLDBContractLedgerName
         ACCORD_EVENTS_QUEUE_NAME: !Ref EventsQueueName
@@ -54,7 +53,7 @@ Resources:
       Description: Dependencies for sam app [node_modules, lib]
       ContentUri: ../dependencies/
       CompatibleRuntimes:
-        - nodejs10.x
+        - nodejs12.x
       LicenseInfo: "Apache2"
       RetentionPolicy: Delete
   #####
@@ -63,7 +62,7 @@ Resources:
   accorddeploy:
     Type: "AWS::Serverless::Function"
     Properties:
-      Runtime: nodejs10.x
+      Runtime: nodejs12.x
       CodeUri: ../fcn-accord-deploy/
       Description: "Lambda function that helps to deploy Accord Project Contract"
       MemorySize: 512
@@ -80,16 +79,16 @@ Resources:
       #     - !Ref AMBDevOpsPrivateSubnet2ID
       Tags:
         AccordContracts: AccordDeploy
-  accordexecute:
+  accordrun:
     Type: "AWS::Serverless::Function"
     Properties:
-      Runtime: nodejs10.x
-      CodeUri: ../fcn-accord-execute/
-      Description: "Lambda function that helps to execute Accord Project Contract"
+      Runtime: nodejs12.x
+      CodeUri: ../fcn-accord-run/
+      Description: "Lambda function that helps to run Accord Project Contract"
       MemorySize: 512
       Timeout: 900
       Role: !GetAtt AccordLambdaRole.Arn
-      FunctionName: !Sub "${AWS::StackName}-accord-execute"
+      FunctionName: !Sub "${AWS::StackName}-accord-run"
       Layers:
         - !Ref depLayer
       # VpcConfig:
@@ -99,31 +98,11 @@ Resources:
       #     - !Ref AMBDevOpsPrivateSubnet1ID
       #     - !Ref AMBDevOpsPrivateSubnet2ID
       Tags:
-        AccordContracts: LambdaAccordExecute
-  qldbgetrevision:
-    Type: "AWS::Serverless::Function"
-    Properties:
-      Runtime: nodejs10.x
-      CodeUri: ../fcn-qldb-get-document-revision/
-      Description: "Retrieve a specific revision of QLDB document by Document Id and full BlockAddress"
-      MemorySize: 256
-      Timeout: 900
-      Role: !GetAtt AccordLambdaRole.Arn
-      FunctionName: !Sub "${AWS::StackName}-qldb-get-document-revision"
-      Layers:
-        - !Ref depLayer
-      # VpcConfig:
-      #   SecurityGroupIds:
-      #     - !Ref AMBDevOpsSecurityGroupID
-      #   SubnetIds:
-      #     - !Ref AMBDevOpsPrivateSubnet1ID
-      #     - !Ref AMBDevOpsPrivateSubnet2ID
-      Tags:
-        AccordContracts: LambdaQLDBGetRevision
+        AccordContracts: LambdaAccordRun
   qldbverify:
     Type: "AWS::Serverless::Function"
     Properties:
-      Runtime: nodejs10.x
+      Runtime: nodejs12.x
       CodeUri: ../fcn-qldb-verify/
       Description: "Verify Ledger Metadata for a specific document against the Ledger"
       MemorySize: 128
@@ -143,7 +122,7 @@ Resources:
   qldbvgethistory:
     Type: "AWS::Serverless::Function"
     Properties:
-      Runtime: nodejs10.x
+      Runtime: nodejs12.x
       CodeUri: ../fcn-qldb-get-document-history/
       Description: "Get full document history from the ledger by document key"
       MemorySize: 128
@@ -163,7 +142,7 @@ Resources:
   qldbvgetmetadata:
     Type: "AWS::Serverless::Function"
     Properties:
-      Runtime: nodejs10.x
+      Runtime: nodejs12.x
       CodeUri: ../fcn-qldb-get-document-metadata/
       Description: "Get full document metadata from the ledger by document key"
       MemorySize: 128
@@ -216,7 +195,7 @@ Resources:
     Properties:
       RoleName: !Sub "${AWS::StackName}-AccordLambdaRole"
       ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -231,39 +210,10 @@ Resources:
         - Key: AccordContracts
           Value: AccordLambdaRole
       Policies:
-        - PolicyName: !Sub "${AWS::StackName}-CloudWatchLogsAndCloudFormationAccess"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - cloudwatch:PutMetricData
-                  - cloudwatch:PutMetricAlarm
-                  - cloudwatch:DescribeAlarms
-                  - cloudformation:describeStacks
-                Resource: "*"
-              - Effect: Allow
-                Action:
-                  - logs:*
-                Resource: arn:aws:logs:*:*:*
-        - PolicyName: !Sub "${AWS::StackName}-VPCLambdaInstantiationAccess"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Sid: VisualEditor0
-                Effect: Allow
-                Action:
-                  - ec2:DescribeSubnets
-                  - ec2:DescribeSecurityGroups
-                Resource: "*"
         - PolicyName: S3ReadWriteAccess
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-              - Action:
-                  - s3:GetObject
-                Effect: Allow
-                Resource: arn:aws:s3:::*/*
               - Action:
                   - s3:GetObject
                   - s3:PutObject
@@ -280,15 +230,10 @@ Resources:
                   - qldb:ExecuteStatement
                   - qldb:GetBlock
                   - qldb:ListLedgers
-                  - qldb:ListJournalS3ExportsForLedger
                   - qldb:GetRevision
-                  - qldb:ExportJournalToS3
                   - qldb:DescribeLedger
                   - qldb:SendCommand
-                  - qldb:ListJournalS3Exports
-                  - qldb:DescribeJournalS3Export
                   - qldb:GetDigest
-                  - qldb:ListTagsForResource"
                 Resource: !Sub "arn:aws:qldb:${AWS::Region}:${AWS::AccountId}:ledger/${QLDBContractLedgerName}"
         - PolicyName: !Sub "${AWS::StackName}-SQSPublishAccess"
           PolicyDocument:
@@ -306,16 +251,11 @@ Outputs:
     Value: !GetAtt accorddeploy.Arn
     Export:
       Name: !Sub "${AWS::StackName}-accord-deployARN"
-  AccordExecuteARN:
-    Description: "Arn of accord execute function"
-    Value: !GetAtt accordexecute.Arn
+  AccordRunARN:
+    Description: "Arn of accord run function"
+    Value: !GetAtt accordrun.Arn
     Export:
-      Name: !Sub "${AWS::StackName}-accord-executeARN"
-  QLDBGetDocRevisionARN:
-    Description: "Arn of QLDB get document revision function"
-    Value: !GetAtt qldbgetrevision.Arn
-    Export:
-      Name: !Sub "${AWS::StackName}-qldb-get-document-revisionARN"
+      Name: !Sub "${AWS::StackName}-accord-run-ARN"
   QLDBVerifyARN:
     Description: "Arn of QLDB verify function"
     Value: !GetAtt qldbverify.Arn
