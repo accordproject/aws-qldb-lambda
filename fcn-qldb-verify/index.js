@@ -16,7 +16,6 @@
 
 const logger = require("/opt/nodejs/lib/logging").getLogger("fcn-qldb-verify");
 const Config = require("./config");
-//const KVS_LIB_PATH = process.env.KVS_LIB_PATH ? process.env.KVS_LIB_PATH : "/opt/nodejs/lib/s3-kvs.js";
 const KVS = require("amazon-qldb-kvs-nodejs").QLDBKVS;
 
 /**

@@ -17,9 +17,9 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@accordproject/cicero-core": "^0.21.26",
-    "@accordproject/cicero-engine": "^0.21.26",
-    "amazon-qldb-kvs-nodejs": "0.3.0",
+    "@accordproject/cicero-core": "^0.22.00",
+    "@accordproject/cicero-engine": "^0.22.00",
+    "amazon-qldb-kvs-nodejs": "0.4.0",
     "aws-sdk": "^2.564.0",
     "fs-extra": "^8.1.0",
     "jsbi": "^3.1.1",

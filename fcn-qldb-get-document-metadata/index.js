@@ -46,10 +46,15 @@ exports.handler = async (event, context) => {
             const qldbKVS = new QLDBKVS(ledgerName, tableName);
 
             // get verification result
-            const result = await qldbKVS.getMetadata(documentKey);
+            let result = await qldbKVS.getMetadata(documentKey);
+            delete result.Proof;
+
+            const response = {
+                ledgerMetadata: result
+            }
 
             const output = {
-                response: result
+                response: response
             }
             resolve(JSON.stringify(output));
         } catch (err) {

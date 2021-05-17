@@ -23,7 +23,11 @@ module.exports = class Config {
         return new Promise(async (resolve, reject) => {
             try {
 
-                this.ledgerMetadata = event.ledgerMetadata;
+                try {
+                    this.ledgerMetadata = JSON.parse(event.ledgerMetadata);
+                } catch (error) {
+                    this.ledgerMetadata = event.ledgerMetadata;
+                }
 
                 if (!this.ledgerMetadata) {
                     throw new Error(` Please specify ledgerMetadata in the event message`)
@@ -42,9 +46,6 @@ module.exports = class Config {
                 };
                 if (!this.ledgerMetadata.RevisionHash || !this.ledgerMetadata.RevisionHash.length) {
                     throw new Error(` Please specify ledgerMetadata.RevisionHash in the event message`)
-                };
-                if (!this.ledgerMetadata.Proof) {
-                    throw new Error(` Please specify ledgerMetadata.Proof in the event message`)
                 };
                 if (!this.ledgerMetadata.LedgerDigest) {
                     throw new Error(` Please specify ledgerMetadata.LedgerDigest in the event message`)
