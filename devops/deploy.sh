@@ -64,11 +64,8 @@ EventsQueueName=$ACCORD_EVENTS_SQS_QUEUE_NAME \
 export ACCORD_DEPLOY_LAMBDA_ARN=$(aws cloudformation describe-stacks --stack-name $ACCORD_STACK_NAME --region $ACCORD_REGION --query 'Stacks[0].Outputs[?OutputKey==`AccordDeployARN`].OutputValue' --output text)
 echo "ACCORD_DEPLOY_LAMBDA_ARN="$ACCORD_DEPLOY_LAMBDA_ARN
 
-export ACCORD_EXECUTE_LAMBDA_ARN=$(aws cloudformation describe-stacks --stack-name $ACCORD_STACK_NAME --region $ACCORD_REGION --query 'Stacks[0].Outputs[?OutputKey==`AccordExecuteARN`].OutputValue' --output text)
-echo "ACCORD_EXECUTE_LAMBDA_ARN="$ACCORD_EXECUTE_LAMBDA_ARN
-
-export QLDB_GET_REVISION_LAMBDA_ARN=$(aws cloudformation describe-stacks --stack-name $ACCORD_STACK_NAME --region $ACCORD_REGION --query 'Stacks[0].Outputs[?OutputKey==`QLDBGetDocRevisionARN`].OutputValue' --output text)
-echo "QLDB_GET_REVISION_LAMBDA_ARN="$QLDB_GET_REVISION_LAMBDA_ARN
+export ACCORD_RUN_LAMBDA_ARN=$(aws cloudformation describe-stacks --stack-name $ACCORD_STACK_NAME --region $ACCORD_REGION --query 'Stacks[0].Outputs[?OutputKey==`AccordRunARN`].OutputValue' --output text)
+echo "ACCORD_RUN_LAMBDA_ARN="$ACCORD_RUN_LAMBDA_ARN
 
 export QLDB_VERIFY_LAMBDA_ARN=$(aws cloudformation describe-stacks --stack-name $ACCORD_STACK_NAME --region $ACCORD_REGION --query 'Stacks[0].Outputs[?OutputKey==`QLDBVerifyARN`].OutputValue' --output text)
 echo "QLDB_VERIFY_LAMBDA_ARN="$QLDB_VERIFY_LAMBDA_ARN
@@ -78,3 +75,5 @@ echo "ACCORD_CONTRACT_LEDGER_NAME="$ACCORD_CONTRACT_LEDGER_NAME
 
 export ACCORD_EVENTS_SQS_QUEUE_ARN=$(aws cloudformation describe-stacks --stack-name $ACCORD_STACK_NAME --region $ACCORD_REGION --query 'Stacks[0].Outputs[?OutputKey==`EventsQueueARN`].OutputValue' --output text)
 echo "ACCORD_EVENTS_SQS_QUEUE_ARN="$ACCORD_EVENTS_SQS_QUEUE_ARN
+
+rm ./template.yaml
