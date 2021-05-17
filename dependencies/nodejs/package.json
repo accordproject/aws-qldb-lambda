@@ -4,8 +4,8 @@
   "description": "A set of Lambda functions to deploy and execute an Accord Project Smart Legal Contract",
   "main": "index.js",
   "engines": {
-    "node": ">=8.4.0 <11.0",
-    "npm": ">=5.3.0 <7.0"
+    "node": ">=10.0.0 <14.0",
+    "npm": ">=6.0.0 <7.0"
   },
   "scripts": {
     "start": "node index.js",
