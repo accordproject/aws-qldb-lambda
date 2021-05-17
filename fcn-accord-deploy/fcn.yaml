@@ -30,7 +30,6 @@ Resources:
       Environment:
         Variables:
           AWS_REGION_NAME: "us-east-1"
-          KVS_LIB_PATH: "/opt/nodejs/lib/amazon-qldb-kvs-nodejs/dist/index.js"
   depLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
