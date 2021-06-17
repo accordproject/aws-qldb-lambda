@@ -167,7 +167,7 @@ Resources:
     Properties:
       DeletionProtection: true
       Name: !Ref QLDBContractLedgerName
-      PermissionsMode: "ALLOW_ALL"
+      PermissionsMode: "STANDARD"
       Tags:
         - Key: AccordContracts
           Value: ContractStateLedger
@@ -220,14 +220,13 @@ Resources:
                   - s3:PutObjectAcl
                 Effect: Allow
                 Resource: !Sub "arn:aws:s3:::${ContractTemplatesRepositoryS3BucketName}*/*"
-        - PolicyName: !Sub "${AWS::StackName}-QLDBReadWriteAccess"
+        - PolicyName: !Sub "${AWS::StackName}-QLDBLedgerReadWriteAccess"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Sid: VisualEditor0
                 Effect: Allow
                 Action:
-                  - qldb:ExecuteStatement
                   - qldb:GetBlock
                   - qldb:ListLedgers
                   - qldb:GetRevision
@@ -235,6 +234,29 @@ Resources:
                   - qldb:SendCommand
                   - qldb:GetDigest
                 Resource: !Sub "arn:aws:qldb:${AWS::Region}:${AWS::AccountId}:ledger/${QLDBContractLedgerName}"
+        - PolicyName: !Sub "${AWS::StackName}-QLDBLedgerTablesReadWriteAccess"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: VisualEditor0
+                Effect: Allow
+                Action:
+                  - qldb:PartiQLCreateTable
+                  - qldb:PartiQLCreateIndex
+                  - qldb:PartiQLInsert
+                  - qldb:PartiQLUpdate
+                  - qldb:PartiQLSelect
+                  - qldb:PartiQLHistoryFunction
+                Resource: !Sub "arn:aws:qldb:${AWS::Region}:${AWS::AccountId}:ledger/${QLDBContractLedgerName}/table/*"
+        - PolicyName: !Sub "${AWS::StackName}-QLDBLedgerUserTablesReadAccess"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: VisualEditor0
+                Effect: Allow
+                Action:
+                  - qldb:PartiQLSelect
+                Resource: !Sub "arn:aws:qldb:${AWS::Region}:${AWS::AccountId}:ledger/${QLDBContractLedgerName}/information_schema/user_tables"
         - PolicyName: !Sub "${AWS::StackName}-SQSPublishAccess"
           PolicyDocument:
             Version: "2012-10-17"

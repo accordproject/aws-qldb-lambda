@@ -21,7 +21,7 @@ if test -f "./devops/accord-sam-s3-template.yaml"; then
 fi
 
 echo " "
-echo "Deploying deploying S3 bucket for SAM application deployment."
+echo "Deploying S3 bucket for SAM application deployment."
 echo "ACCORD_REGION="$ACCORD_REGION
 echo "ACCORD_DEPLOY_SAM_S3_BUCKET="$ACCORD_DEPLOY_SAM_S3_BUCKET
 echo "ACCORD_BUILD_BUCKET_NAME_PREFIX="$ACCORD_BUILD_BUCKET_NAME_PREFIX
