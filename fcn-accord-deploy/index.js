@@ -31,7 +31,7 @@ const {
 } = require('@accordproject/cicero-engine');
 
 const CONTRACT_TEMPLATE_REPO_KVS_LIB_PATH = process.env.CONTRACT_TEMPLATE_REPO_KVS_LIB_PATH ? process.env.CONTRACT_TEMPLATE_REPO_KVS_LIB_PATH : "/opt/nodejs/lib/s3-kvs.js";
-const KVS = require("amazon-qldb-kvs-nodejs").QLDBKVS;
+const QLDBKVS = require("amazon-qldb-kvs-nodejs").QLDBKVS;
 const S3 = require(CONTRACT_TEMPLATE_REPO_KVS_LIB_PATH);
 
 const emptyDir = Util.promisify(fs.emptyDir);
@@ -74,9 +74,6 @@ exports.handler = async (event, context) => {
             const contractResultKeyName = config.contractResultKeyName;
 
             const contractFileName = config.contractFileName;
-            // const contractDataFileName = config.contractDataFileName;
-            // const contractStateFileName = config.contractStateFileName;
-            // const contractResultFileName = config.contractResultFileName;
 
             const contractData = config.contractData;
 
@@ -87,7 +84,7 @@ exports.handler = async (event, context) => {
             await mkdir(TARGET_DIR);
 
             const s3 = new S3(contractSourceS3BucketName, "", false, TARGET_DIR);
-            const kvs = new KVS(ledgerName, ledgerDataPath);
+            const qldbKVS = new QLDBKVS(ledgerName, ledgerDataPath);
 
             // load the template
             const contractFilePath = `${TARGET_DIR}/${contractFileName}`;
@@ -121,9 +118,9 @@ exports.handler = async (event, context) => {
             // Check if contract data exists
             let contractDataExists = true;
             try {
-                await kvs.getValue(contractDataKeyName);
+                await qldbKVS.getValue(contractDataKeyName);
             } catch (err) {
-                if (err.toString().includes("Requested record does not exist")) {
+                if (err.toString().includes("Requested document does not exist")) {
                     contractDataExists = false;
                 } else {
                     throw err;
@@ -132,7 +129,7 @@ exports.handler = async (event, context) => {
 
             //Saving contract data
             if (!contractDataExists) {
-                await kvs.setValue(contractDataKeyName, clause.getData());
+                await qldbKVS.setValue(contractDataKeyName, clause.getData());
                 logger.debug(`${fcnName} Saved contract data: ${JSON.stringify(clause.getData())}`);
             } else {
                 throw new Error(`${fcnName} Ledger with name ${ledgerName} in path ${ledgerDataPath} already has data with id ${contractDataKeyName}. Please clear it up before continuing.`)
@@ -142,9 +139,9 @@ exports.handler = async (event, context) => {
             //Checking if contract state exists
             let contractStateExists = true;
             try {
-                await kvs.getValue(contractStateKeyName);
+                await qldbKVS.getValue(contractStateKeyName);
             } catch (err) {
-                if (err.toString().includes("Requested record does not exist")) {
+                if (err.toString().includes("Requested document does not exist")) {
                     contractStateExists = false;
                 } else {
                     throw err;
@@ -153,18 +150,18 @@ exports.handler = async (event, context) => {
 
             if (!contractStateExists) {
                 // Saving contract as a file
-                // await kvs.uploadAsFile(contractFileName, contractFilePath);
+                // await qldbKVS.uploadAsFile(contractFileName, contractFilePath);
                 const contractTemplateLinkObject = {
                     s3path: contractSourceS3BucketObjectPath,
                     hash: template.getHash()
                 }
 
-                await kvs.setValue(contractFileName, contractTemplateLinkObject);
+                await qldbKVS.setValue(contractFileName, contractTemplateLinkObject);
 
-                await kvs.setValue(contractStateKeyName, result.state);
+                await qldbKVS.setValue(contractStateKeyName, result.state);
 
                 // save full result
-                await kvs.setValue(contractResultKeyName, result);
+                await qldbKVS.setValue(contractResultKeyName, result);
             } else {
                 throw new Error(`${fcnName} Ledger with name ${ledgerName} in path ${ledgerDataPath} already has state with id ${contractStateKeyName}. Please clear it up before continuing.`)
             }
@@ -175,10 +172,10 @@ exports.handler = async (event, context) => {
                     const sqsClient = new SQSClient(eventsQueueURL, AWS_REGION_NAME);
                     const allPromises = [];
                     let ledgerMetadata = {};
-                    if (kvs.getMetadata) {
+                    if (qldbKVS.getMetadata) {
                         // Giving the ledger some time to settle
                         await Utils.__timeout(400);
-                        ledgerMetadata = await kvs.getMetadata(contractResultKeyName);
+                        ledgerMetadata = await qldbKVS.getMetadata(contractResultKeyName);
                     }
                     result.emit.forEach(async (event, index) => {
                         const eventMessage = {
