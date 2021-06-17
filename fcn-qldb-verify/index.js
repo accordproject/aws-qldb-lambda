@@ -16,7 +16,7 @@
 
 const logger = require("/opt/nodejs/lib/logging").getLogger("fcn-qldb-verify");
 const Config = require("./config");
-const KVS = require("amazon-qldb-kvs-nodejs").QLDBKVS;
+const QLDBKVS = require("amazon-qldb-kvs-nodejs").QLDBKVS;
 
 /**
  * Verifies metadata information, sent to the function
@@ -47,10 +47,10 @@ exports.handler = async (event, context) => {
 
             const ledgerMetadata = config.ledgerMetadata;
 
-            const kvs = new KVS(ledgerMetadata.LedgerName, ledgerMetadata.TableName);
+            const qldbKVS = new QLDBKVS(ledgerMetadata.LedgerName, ledgerMetadata.TableName, false);
 
             // get verification result
-            const verificationResult = await kvs.verifyMetadata(ledgerMetadata);
+            const verificationResult = await qldbKVS.verifyLedgerMetadata(ledgerMetadata);
 
             const output = {
                 response: verificationResult

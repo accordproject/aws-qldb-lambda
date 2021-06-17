@@ -43,7 +43,7 @@ exports.handler = async (event, context) => {
             const tableName = config.tableName;
             const documentKey = config.documentKey;
 
-            const qldbKVS = new QLDBKVS(ledgerName, tableName);
+            const qldbKVS = new QLDBKVS(ledgerName, tableName, false);
 
             // get verification result
             const result = await qldbKVS.getHistory(documentKey);

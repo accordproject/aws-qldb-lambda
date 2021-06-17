@@ -33,7 +33,7 @@ const {
     join
 } = require("path");
 
-const KVS = require("amazon-qldb-kvs-nodejs").QLDBKVS;
+const QLDBKVS = require("amazon-qldb-kvs-nodejs").QLDBKVS;
 const CONTRACT_TEMPLATE_REPO_KVS_LIB_PATH = process.env.CONTRACT_TEMPLATE_REPO_KVS_LIB_PATH ? process.env.CONTRACT_TEMPLATE_REPO_KVS_LIB_PATH : "/opt/nodejs/lib/s3-kvs.js";
 const S3 = require(CONTRACT_TEMPLATE_REPO_KVS_LIB_PATH);
 
@@ -80,14 +80,14 @@ exports.handler = async (event, context) => {
             logger.info(`${fcnName} New config object: ${JSON.stringify(config)}`);
 
             const s3 = new S3(contractSourceS3BucketName, "", false, TARGET_DIR);
-            const kvs = new KVS(ledgerName, ledgerDataPath);
+            const qldbKVS = new QLDBKVS(ledgerName, ledgerDataPath, false);
 
             await emptyDir(STORAGE_DIR);
             await mkdir(TARGET_DIR);
 
             const contractFilePath = `${TARGET_DIR}/${contractFileName}`;
 
-            const contractTemplateLinkObject = await kvs.getValue(contractFileName);
+            const contractTemplateLinkObject = await qldbKVS.getValue(contractFileName);
 
             const templateData = await s3.downloadAsFile(contractTemplateLinkObject.s3path, contractFilePath);
 
@@ -111,15 +111,18 @@ exports.handler = async (event, context) => {
             // load data
             let dataJSON;
             try {
-                dataJSON = await kvs.getValue(contractDataKeyName);
+                dataJSON = await qldbKVS.getValue(contractDataKeyName);
             } catch (err) {
                 throw new Error(`${fcnName} Did not find data for contract ${contractId}. Please ensure it has been deployed.`);
             }
 
             // load state
             let stateJSON;
+            let stateVersion;
             try {
-                stateJSON = await kvs.getValue(contractStateKeyName);
+                const state = await qldbKVS.getValue(contractStateKeyName, true);
+                stateJSON = state.data;
+                stateVersion = state.version;
             } catch (err) {
                 throw new Error(`${fcnName} Did not find state for contract ${contractId}. Please ensure it has been deployed.`);
             }
@@ -142,15 +145,14 @@ exports.handler = async (event, context) => {
             logger.info(`${fcnName} Response from engine execute: ${JSON.stringify(result)}`);
 
             // save the state
-            const stateRes = await kvs.setValue(contractStateKeyName, result.state);
+            const stateRes = await qldbKVS.setValue(contractStateKeyName, result.state, stateVersion);
 
             if (!stateRes) {
                 throw new Error(`State for "${contractId}" was not persisted. Please try again later. `)
             }
 
-
-            // save the result
-            const resultRes = await kvs.setValue(contractResultKeyName, result);
+            // Save the result. Its version should be the same with the state.
+            const resultRes = await qldbKVS.setValue(contractResultKeyName, result, stateVersion);
 
             if (!resultRes) {
                 throw new Error(`Result for "${contractId}" was not persisted. Please try again later. `)
@@ -162,10 +164,10 @@ exports.handler = async (event, context) => {
                     const sqsClient = new SQSClient(eventsQueueURL, AWS_REGION_NAME);
                     const allPromises = [];
                     let ledgerMetadata = {};
-                    if (kvs.getMetadata) {
+                    if (qldbKVS.getMetadata) {
                         // Giving the ledger some time to settle
                         await Utils.__timeout(400);
-                        ledgerMetadata = await kvs.getMetadata(contractResultKeyName);
+                        ledgerMetadata = await qldbKVS.getMetadata(contractResultKeyName);
                     }
                     result.emit.forEach(async (event, index) => {
                         const eventMessage = {
