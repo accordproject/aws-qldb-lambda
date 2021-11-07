@@ -1,18 +1,18 @@
 /*
-# Copyright 2019 Nikolay Vlasov
-# 
-# Licensed under the Apache License, Version 2.0 (the "License").
-# You may not use this file except in compliance with the License.
-# A copy of the License is located at
-# 
-#     http://www.apache.org/licenses/LICENSE-2.0
-# 
-# or in the "license" file accompanying this file. This file is distributed 
-# on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
-# express or implied. See the License for the specific language governing 
-# permissions and limitations under the License.
-#
-*/
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *   
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+
+ * http://www.apache.org/licenses/LICENSE-2.0
+
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 const AWS = require('aws-sdk');
 const fs = require('fs');
@@ -24,9 +24,10 @@ const mkdir = Util.promisify(fs.mkdir);
 
 module.exports = class S3KVS {
     constructor(bucketName, prefix, withSSE) {
+        const fcnName = "[S3KVS.constructor]";
         let self = this;
 
-        self.__s3 = new AWS.S3();
+        self.__s3 = new AWS.S3({ httpOptions: { timeout: 3000 } });
         if (!bucketName) {
             throw new Error(`${fcnName}: Please specify bucketName`);
         }
@@ -74,11 +75,11 @@ module.exports = class S3KVS {
                 const file = fs.createWriteStream(filePath);
 
                 s3.getObject(params).on('error', (err) => {
-                        file.destroy();
-                        //reject(`${fcnName}: Error downloading file ${filePath} from S3: ${err}`);
-                        resolve(null)
-                        throw new Error(`${fcnName}: Error downloading file ${filePath} from ${paramId} in S3: ${err}`);
-                    })
+                    file.destroy();
+                    //reject(`${fcnName}: Error downloading file ${filePath} from S3: ${err}`);
+                    resolve(null)
+                    throw new Error(`${fcnName}: Error downloading file ${filePath} from ${paramId} in S3: ${err}`);
+                })
                     .on('httpData', (chunk) => {
                         file.write(chunk, (err) => {
                             if (err) {
@@ -104,6 +105,31 @@ module.exports = class S3KVS {
     // Get object from s3 as a JSON
     getValue(key) {
         const fcnName = "[S3KVS.getValue]";
+        return new Promise(async (resolve, reject) => {
+            const valueAsString = await this.getStringValue(key);
+            if (valueAsString !== null) {
+                resolve(JSON.parse(valueAsString));
+            } else {
+                resolve(null);
+            }
+        })
+
+    };
+
+    getStringValue(key) {
+        const fcnName = "[S3KVS.getStringValue]";
+        return new Promise(async (resolve, reject) => {
+            const valueAsBuffer = await this.getBufferValue(key);
+            if (valueAsBuffer !== null) {
+                resolve(valueAsBuffer.toString('utf-8'));
+            } else {
+                resolve(null);
+            }
+        })
+    };
+
+    getBufferValue(key) {
+        const fcnName = "[S3KVS.getBufferValue]";
         const self = this;
         const bucketName = self.bucketName;
         const paramId = self.prefix === "" ? key : `${self.prefix}/${key}`;
@@ -112,7 +138,7 @@ module.exports = class S3KVS {
             throw new Error(`${fcnName}: Please specify key`);
         }
 
-        logger.debug(`${fcnName} Getting value of ${bucketName}/${paramId} into a JSON object. (Expecting utf8 encoded string)`);
+        logger.debug(`${fcnName} Getting value of ${bucketName}/${paramId} into a Buffer object`);
         return new Promise(async (resolve, reject) => {
             let params = {
                 Bucket: bucketName,
@@ -125,7 +151,7 @@ module.exports = class S3KVS {
                 if (!data) {
                     resolve(null);
                 }
-                resolve(JSON.parse(data.Body.toString('utf-8')));
+                resolve(data.Body);
             } catch (err) {
                 logger.info(`${fcnName} Requested object does not exist.`);
                 resolve(null)
@@ -149,17 +175,21 @@ module.exports = class S3KVS {
             throw new Error(`${fcnName}: Please specify value`);
         }
 
-        let valueAsString = value;
+        let valueAsBuffer;
 
-        if (typeof value !== "string") {
+        if (typeof value === "string") {
+            valueAsBuffer = Buffer.from(value);
+        } else if (Buffer.isBuffer(value)) {
+            valueAsBuffer = value
+        } else {
+            // If value is not a string or a Buffer, we assume it is a JSON object
             try {
-                valueAsString = JSON.stringify(value);
+                const valueAsString = JSON.stringify(value);
+                valueAsBuffer = Buffer.from(valueAsString);
             } catch (err) {
                 throw new Error(`${fcnName} Could not parse submitted value [${value}] to JSON: ${err}`);
             }
         }
-
-        const valueAsBuffer = Buffer.from(valueAsString);
 
         logger.debug(`${fcnName} Setting value of ${bucketName}/${paramId} as utf8 encoded stringified JSON object.`);
 

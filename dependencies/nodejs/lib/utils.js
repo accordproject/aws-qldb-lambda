@@ -1,26 +1,26 @@
 /*
-# Copyright 2019 Nikolay Vlasov
-# 
-# Licensed under the Apache License, Version 2.0 (the "License").
-# You may not use this file except in compliance with the License.
-# A copy of the License is located at
-# 
-#     http://www.apache.org/licenses/LICENSE-2.0
-# 
-# or in the "license" file accompanying this file. This file is distributed 
-# on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
-# express or implied. See the License for the specific language governing 
-# permissions and limitations under the License.
-#
-*/
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *   
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
 
-const Unzipper = require('unzipper');
-const fs = require('fs-extra');
+ * http://www.apache.org/licenses/LICENSE-2.0
+
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+//const Unzipper = require('unzipper');
+//const fs = require('fs-extra');
 const Util = require('util');
 const logger = require("./logging").getLogger("utils");
 
-const ensureDir = Util.promisify(fs.ensureDir);
-const emptyDir = Util.promisify(fs.emptyDir);
+//const ensureDir = Util.promisify(fs.ensureDir);
+//const emptyDir = Util.promisify(fs.emptyDir);
 
 const __objectIterator = async (object, func) => {
     const promises = Object.keys(object).map(async (key) => {
@@ -109,49 +109,49 @@ const __genRandomString = (length) => {
     return randPassword;
 }
 
-const __unzip = (sourceFilePath, targetPath) => {
-    const fcnName = "[__unzip]"
+// const __unzip = (sourceFilePath, targetPath) => {
+//     const fcnName = "[__unzip]"
 
-    return new Promise(async (resolve, reject) => {
-        try {
-            // Unzipper.Open.file(sourceFilePath)
-            //     .then(async (directory) => {
-            //         await directory.extract({
-            //             path: targetPath,
-            //             concurrency: 1
-            //         })
-            //         resolve(targetPath)
-            //     });
-            fs.createReadStream(sourceFilePath)
-                .pipe(Unzipper.Parse())
-                .on('entry', async (entry) => {
-                    const fullPath = `${targetPath}/${entry.path}`;
-                    const type = entry.type; // 'Directory' or 'File'
-                    if (type === 'File') {
-                        let pathElementsArray = fullPath.split("/");
-                        pathElementsArray.splice(-1, 1);
-                        const dirPath = pathElementsArray.join("/");
-                        //logger.debug(`${fcnName} Checking dir: ${dirPath}`);
-                        await ensureDir(`${dirPath}`);
+//     return new Promise(async (resolve, reject) => {
+//         try {
+//             // Unzipper.Open.file(sourceFilePath)
+//             //     .then(async (directory) => {
+//             //         await directory.extract({
+//             //             path: targetPath,
+//             //             concurrency: 1
+//             //         })
+//             //         resolve(targetPath)
+//             //     });
+//             fs.createReadStream(sourceFilePath)
+//                 .pipe(Unzipper.Parse())
+//                 .on('entry', async (entry) => {
+//                     const fullPath = `${targetPath}/${entry.path}`;
+//                     const type = entry.type; // 'Directory' or 'File'
+//                     if (type === 'File') {
+//                         let pathElementsArray = fullPath.split("/");
+//                         pathElementsArray.splice(-1, 1);
+//                         const dirPath = pathElementsArray.join("/");
+//                         //logger.debug(`${fcnName} Checking dir: ${dirPath}`);
+//                         await ensureDir(`${dirPath}`);
 
-                        //logger.debug(`${fcnName} Uzipping file: ${fullPath}`);
-                        entry.pipe(fs.createWriteStream(`${fullPath}`));
-                    }
-                    entry.autodrain();
-                })
-                .on('error', async (err) => {
-                    logger.error(`${fcnName} Error: ${err}. Emptying dir: ${targetPath}`);
-                    await emptyDir(targetPath);
-                    throw `${fcnName} ${err}`
-                })
-                .on('finish', () => {
-                    resolve(targetPath)
-                });
-        } catch (err) {
-            throw `${fcnName} ${err}`
-        }
-    })
-}
+//                         //logger.debug(`${fcnName} Uzipping file: ${fullPath}`);
+//                         entry.pipe(fs.createWriteStream(`${fullPath}`));
+//                     }
+//                     entry.autodrain();
+//                 })
+//                 .on('error', async (err) => {
+//                     logger.error(`${fcnName} Error: ${err}. Emptying dir: ${targetPath}`);
+//                     await emptyDir(targetPath);
+//                     throw `${fcnName} ${err}`
+//                 })
+//                 .on('finish', () => {
+//                     resolve(targetPath)
+//                 });
+//         } catch (err) {
+//             throw `${fcnName} ${err}`
+//         }
+//     })
+// }
 
 module.exports.__objectIterator = __objectIterator;
 module.exports.__arrayIterator = __arrayIterator;
@@ -159,4 +159,4 @@ module.exports.__stringifyCircularJSON = __stringifyCircularJSON;
 module.exports.__timeout = __timeout;
 module.exports.__formatResponseSuccess = __formatResponseSuccess;
 module.exports.__genRandomString = __genRandomString;
-module.exports.__unzip = __unzip;
+//module.exports.__unzip = __unzip;
