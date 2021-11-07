@@ -16,8 +16,6 @@
 
 const logger = require("/opt/nodejs/lib/logging").getLogger("fcn-cicero-deploy");
 const Config = require("./config");
-const fs = require('fs-extra');
-const Util = require('util');
 const Utils = require("/opt/nodejs/lib/utils.js");
 const SQSClient = require("/opt/nodejs/lib/sqs-client.js");
 const {
@@ -34,11 +32,6 @@ const CONTRACT_TEMPLATE_REPO_KVS_LIB_PATH = process.env.CONTRACT_TEMPLATE_REPO_K
 const QLDBKVS = require("amazon-qldb-kvs-nodejs").QLDBKVS;
 const S3 = require(CONTRACT_TEMPLATE_REPO_KVS_LIB_PATH);
 
-const emptyDir = Util.promisify(fs.emptyDir);
-const mkdir = Util.promisify(fs.mkdir);
-
-const STORAGE_DIR = "/tmp";
-const TARGET_DIR = `${STORAGE_DIR}/downloads`;
 const AWS_REGION_NAME = process.env.AWS_REGION_NAME;
 
 /**
@@ -79,27 +72,19 @@ exports.handler = async (event, context) => {
 
             logger.info(`${fcnName} New config object: ${JSON.stringify(config)}`);
 
-            // Just to make sure our file system is clean
-            await emptyDir(STORAGE_DIR);
-            await mkdir(TARGET_DIR);
-
-            const s3 = new S3(contractSourceS3BucketName, "", false, TARGET_DIR);
+            const s3 = new S3(contractSourceS3BucketName, "", false);
             const qldbKVS = new QLDBKVS(ledgerName, ledgerDataPath);
 
             // load the template
-            const contractFilePath = `${TARGET_DIR}/${contractFileName}`;
+            const templateBuffer = await s3.getBufferValue(contractSourceS3BucketObjectPath);
 
-            const templateData = await s3.downloadAsFile(contractSourceS3BucketObjectPath, contractFilePath);
-
-            if (!templateData) {
-                throw new Error(`Did not find an active contract ${contractId}. Ensure it has been uploaded to S3. (1)`);
+            if (!templateBuffer) {
+                throw new Error(`Can not find an active contract ${contractId}. Ensure it has been uploaded to S3. (1)`);
             }
 
             // check that the template is valid
-            logger.debug(`${fcnName} Contract source downloaded. Unzipping.`);
-            const contractUnzipFolder = `${TARGET_DIR}/contract`;
-            await Utils.__unzip(contractFilePath, contractUnzipFolder)
-            const template = await Template.fromDirectory(contractUnzipFolder); //Buffer.from(templateDataString, 'base64'));
+            logger.debug(`${fcnName} Contract template received, initializing...`);
+            const template = await Template.fromArchive(templateBuffer); //Buffer.from(templateDataString, 'base64'));
             logger.info(`${fcnName} Loaded template: ${template.getIdentifier()}`);
 
             // validate and save the contract data
@@ -201,8 +186,6 @@ exports.handler = async (event, context) => {
                 error: `${fcnName}: ${err}`
             }
             reject(JSON.stringify(output));
-        } finally {
-            await emptyDir(STORAGE_DIR);
         }
     })
 };

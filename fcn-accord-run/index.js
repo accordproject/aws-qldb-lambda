@@ -16,8 +16,6 @@
 
 const logger = require("/opt/nodejs/lib/logging").getLogger("fcn-cicero-execute");
 const Config = require("./config");
-const fs = require('fs-extra');
-const Util = require('util');
 const Utils = require("/opt/nodejs/lib/utils.js");
 const SQSClient = require("/opt/nodejs/lib/sqs-client.js");
 const {
@@ -29,19 +27,11 @@ const {
 const {
     Engine
 } = require('@accordproject/cicero-engine');
-const {
-    join
-} = require("path");
 
 const QLDBKVS = require("amazon-qldb-kvs-nodejs").QLDBKVS;
 const CONTRACT_TEMPLATE_REPO_KVS_LIB_PATH = process.env.CONTRACT_TEMPLATE_REPO_KVS_LIB_PATH ? process.env.CONTRACT_TEMPLATE_REPO_KVS_LIB_PATH : "/opt/nodejs/lib/s3-kvs.js";
 const S3 = require(CONTRACT_TEMPLATE_REPO_KVS_LIB_PATH);
 
-const emptyDir = Util.promisify(fs.emptyDir);
-const mkdir = Util.promisify(fs.mkdir);
-
-const STORAGE_DIR = "/tmp";
-const TARGET_DIR = `${STORAGE_DIR}/downloads`;
 const AWS_REGION_NAME = process.env.AWS_REGION_NAME;
 
 /**
@@ -79,29 +69,22 @@ exports.handler = async (event, context) => {
 
             logger.info(`${fcnName} New config object: ${JSON.stringify(config)}`);
 
-            const s3 = new S3(contractSourceS3BucketName, "", false, TARGET_DIR);
+            const s3 = new S3(contractSourceS3BucketName, "", false);
             const qldbKVS = new QLDBKVS(ledgerName, ledgerDataPath, false);
-
-            await emptyDir(STORAGE_DIR);
-            await mkdir(TARGET_DIR);
-
-            const contractFilePath = `${TARGET_DIR}/${contractFileName}`;
 
             const contractTemplateLinkObject = await qldbKVS.getValue(contractFileName);
 
-            const templateData = await s3.downloadAsFile(contractTemplateLinkObject.s3path, contractFilePath);
+            const templateBuffer = await s3.getBufferValue(contractTemplateLinkObject.s3path);
 
-            logger.debug(`${fcnName} Received template data: ${templateData}`);
+            logger.debug(`${fcnName} Received template data`);
 
-            if (!templateData) {
-                throw new Error(`Did not find an active contract file ${contractFileName}. Please ensure it has been uploaded to the ledger with id '${ledgerName}' and ledger data path '${ledgerDataPath}'.`);
+            if (!templateBuffer) {
+                throw new Error(`Can not find an active contract file ${contractFileName}. Please ensure it has been uploaded to the ledger with id '${ledgerName}' and ledger data path '${ledgerDataPath}'.`);
             }
             // const templateDataString = Buffer.from(templateDataArray).toString();
             // logger.info(`${fcnName} Loaded template data: ${templateDataString}`);
             // check that the template is valid
-            const contractUnzipFolder = `${TARGET_DIR}/contract`;
-            await Utils.__unzip(contractFilePath, contractUnzipFolder)
-            const template = await Template.fromDirectory(contractUnzipFolder); //Buffer.from(templateDataString, 'base64'));
+            const template = await Template.fromArchive(templateBuffer); //Buffer.from(templateDataString, 'base64'));
             logger.info(`${fcnName} Loaded template: ${template.getIdentifier()}`);
 
             if (template.getHash() !== contractTemplateLinkObject.hash) {
@@ -194,8 +177,6 @@ exports.handler = async (event, context) => {
                 error: `${fcnName}: ${err}`
             }
             reject(JSON.stringify(output));
-        } finally {
-            await emptyDir(STORAGE_DIR);
         }
     })
 };

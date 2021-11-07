@@ -17,14 +17,12 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@accordproject/cicero-core": "^0.22.00",
-    "@accordproject/cicero-engine": "^0.22.00",
-    "amazon-qldb-kvs-nodejs": "0.6.0",
-    "aws-sdk": "^2.564.0",
-    "fs-extra": "^8.1.0",
-    "jsbi": "^3.1.1",
-    "log4js": "^3.0.6",
-    "unzipper": "^0.10.5"
+    "@accordproject/cicero-core": "^0.22.2",
+    "@accordproject/cicero-engine": "^0.22.2",
+    "amazon-qldb-kvs-nodejs": "0.6.2",
+    "aws-sdk": "^2.1020.0",
+    "jsbi": "^3.2.5",
+    "log4js": "^6.3.0"
   },
   "author": "Nikolay Vlasov"
 }
