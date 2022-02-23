@@ -20,7 +20,7 @@ Resources:
     Type: "AWS::Serverless::Function"
     Properties:
       Handler: index.handler
-      Runtime: nodejs10.x
+      Runtime: nodejs12.x
       CodeUri: .
       Description: ""
       MemorySize: 256
@@ -37,6 +37,6 @@ Resources:
       Description: Dependencies for sam app [node_modules, lib]
       ContentUri: ../dependencies/
       CompatibleRuntimes:
-        - nodejs10.x
+        - nodejs12.x
       LicenseInfo: "Apache2"
       RetentionPolicy: Delete

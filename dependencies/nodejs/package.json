@@ -19,10 +19,10 @@
   "dependencies": {
     "@accordproject/cicero-core": "^0.22.2",
     "@accordproject/cicero-engine": "^0.22.2",
-    "amazon-qldb-kvs-nodejs": "0.6.2",
-    "aws-sdk": "^2.1020.0",
-    "jsbi": "^3.2.5",
-    "log4js": "^6.3.0"
+    "amazon-qldb-kvs-nodejs": "0.7.2",
+    "aws-sdk": "^2.1079.0",
+    "jsbi": "^4.1.0",
+    "log4js": "^6.4.1"
   },
   "author": "Nikolay Vlasov"
 }
